@@ -1,0 +1,24 @@
+# Source (only dist is published)
+src/
+tests/
+examples/
+coverage/
+
+# Config (not needed by consumers)
+tsconfig.json
+tsup.config.ts
+eslint.config.js
+.prettierrc
+.gitignore
+.npmignore
+
+# CI/CD
+.github/
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
