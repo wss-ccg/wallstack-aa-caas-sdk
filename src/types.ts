@@ -1,187 +1,412 @@
-/**
- * WallStack AA-CaaS™ SDK — Type definitions
- *
- * @packageDocumentation
- * @module @wallstack-aa-caas/sdk/types
- */
+/* ==========================================================================
+   PROJECT:   WallStack · B2B CaaS Audio
+   PACKAGE:   @wallstack-aa-caas/sdk
+   FILE:      src/types.ts
+   VERSION:   0.2.0 (SDK · Types from OpenAPI v1.0.2)
+   DATE:      2026-10-04
+   AUTHOR:    Andrey S. Yarovenko (WallStack)
 
-// ─────────────────────────────────────────────────────────────
-// Client Configuration
-// ─────────────────────────────────────────────────────────────
+   DESCRIPTION:
+   TypeScript types for the WallStack SDK, synchronized with the real
+   OpenAPI 3.1 spec of the REST v2 API. Source of truth:
+   https://wallstackaudio.com/api/v2/openapi
 
-/**
- * Configuration options for the WallStack client.
- */
-export interface WallStackClientOptions {
-  /** WallStack API key (required). */
-  apiKey: string;
+   ARCHITECTURAL ROLE:
+   This file is the single source of types for all SDK endpoints.
+   Every API response follows { data, meta } wrapper; every error follows
+   Stripe-style { error: { type, code, message, ... } }.
 
-  /** API base URL. Default: "https://wallstackaudio.com/api/v2". */
-  baseUrl?: string;
+   DEPENDENCIES:
+   - none
+   ========================================================================== */
 
-  /** Request timeout in milliseconds. Default: 30000. */
-  timeout?: number;
+/* ==========================================================================
+   HIERARCHY TREE (FILE STRUCTURE)
+   --------------------------------------------------------------------------
+   types.ts
+   ├── RESPONSE WRAPPERS (3)
+   ├── ERRORS (3)
+   ├── AUTH (4)
+   ├── RELEASES (4)
+   ├── TRACKS (2)
+   ├── ASSETS (5)
+   ├── USER — Usage & Subscription (5)
+   ├── DOWNLOADS (2)
+   ├── REQUEST BODIES (3)
+   ├── PARAMS (1)
+   └── CLIENT OPTIONS (1)
+   ========================================================================== */
 
-  /** Maximum number of retries on failure. Default: 3. */
-  maxRetries?: number;
+/* ==========================================================================
+   FLOW DIAGRAM (TYPE ARCHITECTURE)
+   --------------------------------------------------------------------------
 
-  /** Custom fetch implementation (for edge runtimes / testing). */
-  fetch?: typeof fetch;
+   API RESPONSE:  { data: T, meta: ResponseMeta }
+   API ERROR:     { error: { type, code, message, ... } }
+
+   AUTH FLOW:
+   Register → Login (JWT cookie) → Create API Key (Bearer)
+
+   DOMAIN:
+   Release → Track → Asset → Download Response
+   ========================================================================== */
+
+/* ==========================================================================
+   LAST CHANGES TABLE
+   --------------------------------------------------------------------------
+   | Version | Date       | Change                                              |
+   |---------|------------|-----------------------------------------------------|
+   | 0.1.0   | 2026-10-02 | Initial release (fictional types).                  |
+   | 0.2.0   | 2026-10-04 | FULL REWRITE FROM OPENAPI v1.0.2:                   |
+   |         |            | • Release (was Dataset).                            |
+   |         |            | • Track + Asset.                                    |
+   |         |            | • ApiResponse<T> = { data, meta }.                  |
+   |         |            | • ApiErrorBody (Stripe-style).                      |
+   |         |            | • User, Workspace, ApiKey, Usage, Subscription.     |
+   |         |            | • DownloadRequest, DownloadResponse.                |
+   |         |            | • 7 AssetType, 5 StemType.                          |
+   |         |            | • Dual auth (apiKey + jwtCookie).                   |
+   ========================================================================== */
+
+/* ==========================================================================
+   RESPONSE WRAPPERS
+   ========================================================================== */
+
+/** API response metadata. */
+export interface ResponseMeta {
+  /** Unique request ID (e.g. "req_a1b2c3d4..."). */
+  request_id: string;
+  /** ISO 8601 timestamp of the response. */
+  timestamp: string;
+  /** Optional rate limit information. */
+  rate_limit?: RateLimitMeta;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Datasets
-// ─────────────────────────────────────────────────────────────
+/** Rate limit info embedded in meta. */
+export interface RateLimitMeta {
+  /** Maximum requests in the window. */
+  limit: number;
+  /** Remaining requests in the window. */
+  remaining: number;
+  /** Unix timestamp of reset. */
+  reset_at: number;
+}
 
-/**
- * A WallStack dataset — a collection of paired DI + Wet audio tracks.
- */
-export interface Dataset {
-  /** Unique dataset ID (e.g. "ds_abc123"). */
+/** Universal API response wrapper: { data, meta }. */
+export interface ApiResponse<T> {
+  data: T;
+  meta: ResponseMeta;
+}
+
+/* ==========================================================================
+   ERRORS (Stripe-style)
+   ========================================================================== */
+
+/** 7 error types returned by the API. */
+export type ErrorType =
+  | "invalid_request_error"
+  | "authentication_error"
+  | "permission_error"
+  | "not_found_error"
+  | "conflict_error"
+  | "rate_limit_error"
+  | "api_error";
+
+/** API error body. */
+export interface ApiErrorBody {
+  type: ErrorType;
+  code: string;
+  message: string;
+  param?: string;
+  doc_url?: string;
+  request_id?: string;
+  retry_after?: number;
+}
+
+/** Response containing an error. */
+export interface ApiErrorResponse {
+  error: ApiErrorBody;
+}
+
+/* ==========================================================================
+   AUTH
+   ========================================================================== */
+
+/** User role. */
+export type UserRole = "USER" | "ADMIN";
+
+/** Subscription tier. */
+export type PlanTier = "SINGLE_RELEASE" | "CAAS" | "ENTERPRISE";
+
+/** User workspace. */
+export interface Workspace {
   id: string;
-
-  /** Human-readable dataset name. */
   name: string;
-
-  /** Dataset description. */
-  description?: string;
-
-  /** Total number of tracks in the dataset. */
-  trackCount: number;
-
-  /** Total size in bytes. */
-  sizeBytes: number;
-
-  /** Sample rate in Hz (e.g. 48000). */
-  sampleRate: number;
-
-  /** Bit depth (e.g. 24). */
-  bitDepth: number;
-
-  /** Licensing tier for this dataset. */
-  license: LicenseType;
-
-  /** ISO 8601 creation timestamp. */
-  createdAt: string;
-
-  /** ISO 8601 last update timestamp. */
-  updatedAt: string;
+  planTier: PlanTier | null;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Tracks
-// ─────────────────────────────────────────────────────────────
-
-/**
- * A single track — one DI signal + one Wet (reamped) signal.
- */
-export interface Track {
-  /** Unique track ID. */
+/** Authenticated user. */
+export interface User {
   id: string;
-
-  /** Parent dataset ID. */
-  datasetId: string;
-
-  /** Track name. */
-  name: string;
-
-  /** Duration in seconds. */
-  duration: number;
-
-  /** Instrument type (guitar, bass, synth, etc.). */
-  instrument: string;
-
-  /** Amp / signal chain description. */
-  signalChain: string;
-
-  /** DI file URL (dry signal). */
-  diUrl: string;
-
-  /** Wet file URL (reamped signal). */
-  wetUrl: string;
-
-  /** Sample rate in Hz. */
-  sampleRate: number;
-
-  /** Bit depth. */
-  bitDepth: number;
-
-  /** ISO 8601 creation timestamp. */
-  createdAt: string;
+  email: string;
+  fullName: string | null;
+  company: string | null;
+  role: UserRole;
+  workspace: Workspace;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Licenses
-// ─────────────────────────────────────────────────────────────
-
-/**
- * License type — determines usage rights.
- */
-export type LicenseType =
-  | "personal"
-  | "commercial"
-  | "ai-training"
-  | "enterprise"
-  | "custom";
-
-/**
- * A license key granting usage rights to a dataset.
- */
-export interface License {
-  /** Unique license key. */
-  key: string;
-
-  /** Dataset ID this license applies to. */
-  datasetId: string;
-
-  /** License type. */
-  type: LicenseType;
-
-  /** Company / licensee name. */
-  company: string;
-
-  /** Contact email. */
-  email?: string;
-
-  /** ISO 8601 issue timestamp. */
-  issuedAt: string;
-
-  /** ISO 8601 expiration timestamp (null = perpetual). */
+/** API key. */
+export interface ApiKey {
+  id: string;
+  name: string | null;
+  /** Key prefix (e.g. "ws_live_a1b2"). */
+  keyPrefix: string;
+  /** Full key — shown ONLY on creation. */
+  rawKey?: string;
+  tier: PlanTier;
+  isSandbox: boolean;
+  createdAt: string;
   expiresAt: string | null;
-
-  /** Whether the license is currently active. */
-  active: boolean;
 }
 
-/**
- * Parameters for creating a new license.
- */
-export interface CreateLicenseParams {
-  datasetId: string;
-  type: LicenseType;
-  company: string;
-  email?: string;
+/* ==========================================================================
+   RELEASES
+   ========================================================================== */
+
+/** Release status. */
+export type ReleaseStatus = "available" | "upcoming";
+
+/** Edition type. */
+export type EditionType = "full_mix" | "producer";
+
+/** A WallStack release. */
+export interface Release {
+  id: string;
+  slug: string;
+  release_number: number;
+  title: string;
+  description: string;
+  status: ReleaseStatus;
+  bpm: number;
+  key: string;
+  genre: string | null;
+  keywords: string[];
+  price: number | null;
+  currency: string;
+  cover_url: string;
+  edition_type: EditionType;
+  track_count: number;
+  published_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-// ─────────────────────────────────────────────────────────────
-// Pagination
-// ─────────────────────────────────────────────────────────────
+/** Preview of a track inside a release. */
+export interface ReleaseTrackPreview {
+  title: string;
+  duration: number;
+  previewUrl: string | null;
+}
 
-/**
- * Generic paginated response.
- */
-export interface PaginatedResponse<T> {
-  data: T[];
+/** Release with full track list. */
+export interface ReleaseDetail extends Release {
+  tracks: Track[];
+}
+
+/* ==========================================================================
+   TRACKS
+   ========================================================================== */
+
+/** Stem type. */
+export type StemType = "solo" | "rhythm" | "arpeggio" | "bass" | "other";
+
+/** A track. */
+export interface Track {
+  id: string;
+  slug: string;
+  title: string;
+  display_name: string;
+  duration_seconds: number;
+  duration_formatted: string;
+  track_number: number;
+  bpm: number;
+  key: string;
+  format: string;
+  stems_available: StemType[];
+  di_available: boolean;
+  assets: Asset[];
+}
+
+/* ==========================================================================
+   ASSETS
+   ========================================================================== */
+
+/** 7 asset types. */
+export type AssetType =
+  | "FULL_MIX"
+  | "STEM_RHYTHM"
+  | "STEM_ARPEGGIO"
+  | "STEM_SOLO"
+  | "DI_RHYTHM"
+  | "DI_ARPEGGIO"
+  | "DI_SOLO";
+
+/** Asset content type. */
+export type AssetContentType = "MIX" | "STEMS" | "DI" | "BED";
+
+/** Asset channel. */
+export type AssetChannel = "LEFT" | "RIGHT" | "DUAL" | "MONO";
+
+/** Asset status. */
+export type AssetStatus = "PLANNED" | "UPLOADED" | "PUBLISHED";
+
+/** A track asset (file). */
+export interface Asset {
+  id: string;
+  type: AssetType;
+  content_type: AssetContentType | null;
+  rhythm_type: string | null;
+  channel: AssetChannel | null;
+  file_name: string | null;
+  display_name: string;
+  download_url: string | null;
+  r2_key: string;
+  size_bytes: number;
+  format: string;
+  sample_rate: number;
+  bit_depth: number;
+  key: string | null;
+  genre: string | null;
+  bitrate: string | null;
+  status: AssetStatus;
+}
+
+/* ==========================================================================
+   USER — Usage & Subscription
+   ========================================================================== */
+
+/** Billing period. */
+export interface Period {
+  start: string;
+  end: string;
+}
+
+/** Request counter. */
+export interface RequestCounter {
   total: number;
   limit: number;
-  offset: number;
-  hasMore: boolean;
+  remaining: number;
 }
 
-/**
- * List parameters for paginated endpoints.
- */
-export interface ListParams {
+/** API usage stats. */
+export interface Usage {
+  api_key_id: string;
+  key_prefix: string;
+  period: Period;
+  requests: RequestCounter;
+  last_used_at: string | null;
+}
+
+/** Subscription features. */
+export interface SubscriptionFeatures {
+  monthlyRequests: number;
+  dailyTokens?: number;
+  rolling30Days?: number;
+  reaperScriptAccess: boolean;
+  apiAccess: boolean;
+}
+
+/** Subscription. */
+export interface Subscription {
+  tier: PlanTier;
+  isActive: boolean;
+  expiresAt: string | null;
+  autoRenew: boolean;
+  features: SubscriptionFeatures;
+}
+
+/* ==========================================================================
+   DOWNLOADS
+   ========================================================================== */
+
+/** Download request. */
+export interface DownloadRequest {
+  trackSlug: string;
+  assetType: AssetType;
+}
+
+/** Download response. */
+export interface DownloadResponse {
+  download_url: string;
+  license_id: string;
+  /** TTL in seconds. */
+  expires_in: number;
+  track_title: string;
+  asset_type: AssetType;
+}
+
+/* ==========================================================================
+   REQUEST BODIES
+   ========================================================================== */
+
+/** Registration request. */
+export interface RegisterRequest {
+  email: string;
+  password: string;
+  fullName?: string;
+  company?: string;
+}
+
+/** Login request. */
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+/** Create API key request. */
+export interface TokenRequest {
+  name?: string;
+  sandbox?: boolean;
+}
+
+/* ==========================================================================
+   PARAMS
+   ========================================================================== */
+
+/** Params for listing releases. */
+export interface ListReleasesParams {
+  status?: ReleaseStatus;
   limit?: number;
   offset?: number;
 }
+
+/* ==========================================================================
+   CLIENT OPTIONS
+   ========================================================================== */
+
+/** SDK client options. */
+export interface WallStackClientOptions {
+  /** API key (ws_live_* or ws_sandbox_*). Used as Bearer. */
+  apiKey?: string;
+  /** JWT cookie (ws_session) for dashboard/admin endpoints. */
+  jwtCookie?: string;
+  /** Base URL. Default: "https://wallstackaudio.com/api/v2". */
+  baseUrl?: string;
+  /** Timeout in ms. Default: 30000. */
+  timeout?: number;
+  /** Max retry attempts. Default: 3. */
+  maxRetries?: number;
+  /** Custom fetch (for edge / tests). */
+  fetch?: typeof fetch;
+}
+
+/* ==========================================================================
+   END OF FILE
+   --------------------------------------------------------------------------
+   Copyright(c) 2026 WallStack · B2B CaaS Audio. All rights reserved.
+
+   Author:   Andrey S. Yarovenko (WallStack)
+   Project:  AA-CaaS™ (Analog Audio Content-as-a-Service)
+   Contact:  origin@wallstackaudio.com
+   Docs:     https://wallstackaudio.com/api-docs
+   ========================================================================== */

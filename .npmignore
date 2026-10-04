@@ -22,3 +22,8 @@ eslint.config.js
 .vscode/
 .idea/
 .DS_Store
+
+# Backups
+*.bak
+*.bak-*
+*.bak-before-*
