@@ -2,7 +2,7 @@
    PROJECT:   WallStack · B2B CaaS Audio
    PACKAGE:   @wallstack-aa-caas/sdk
    FILE:      examples/datasets.ts
-   VERSION:   1.0.0 (Example · Dataset Centric 2.0)
+   VERSION:   1.1.0 (Example · Dataset Centric 2.0)
    DATE:      2026-11-16
    AUTHOR:    Andrey S. Yarovenko (WallStack)
 
@@ -53,7 +53,7 @@ async function main() {
   }
 
   // 3. Bearer — download Dataset Centric 2.0 manifest (JSON)
-  // (requires apiKey + existing dataset)
+  // (requires apiKey + existing dataset; no public dataset yet — replace with your ID)
   if (client) {
     console.log("\nFetching Dataset Centric 2.0 manifest...");
     try {

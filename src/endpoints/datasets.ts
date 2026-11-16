@@ -2,7 +2,7 @@
    PROJECT:   WallStack · B2B CaaS Audio
    PACKAGE:   @wallstack-aa-caas/sdk
    FILE:      src/endpoints/datasets.ts
-   VERSION:   1.0.0 (SDK · Datasets endpoints — Dataset Centric 2.0)
+   VERSION:   1.1.0 (SDK · Datasets endpoints — Dataset Centric 2.0)
    DATE:      2026-11-16
    AUTHOR:    Andrey S. Yarovenko (WallStack)
 

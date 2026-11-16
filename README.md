@@ -67,6 +67,9 @@ console.log(manifest.dataset.standardVersion); // "wss-ccg-ds-2.0"
 console.log(`${manifest.tracks.length} tracks, ${manifest.tracks[0].items.length} items`);
 ```
 
+> **Demo release:** `wss-ccg-vol-1` (FULL_MIX only). For stems/DI — a paid release is required.
+> **Datasets:** `wss-ccg-ds-NNNN` is a placeholder — request a dataset first.
+
 ---
 
 ## Authentication

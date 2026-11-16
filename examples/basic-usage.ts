@@ -2,7 +2,7 @@
    PROJECT:   WallStack · B2B CaaS Audio
    PACKAGE:   @wallstack-aa-caas/sdk
    FILE:      examples/basic-usage.ts
-   VERSION:   0.2.0 (SDK · Basic usage example)
+   VERSION:   1.1.0 (SDK · Basic usage example)
    DATE:      2026-10-04
    AUTHOR:    Andrey S. Yarovenko (WallStack)
 
@@ -93,6 +93,7 @@
    |         |            | • Public, Bearer, and Cookie examples.              |
    |         |            | • Idempotency-Key usage.                            |
    |         |            | • Removed: datasets.*, licenses.*.                  |
+   | 1.0.0   | 2026-11-16 | SDK 1.0.0: Naming System 2.0 + Dataset Centric 2.0. |
    ========================================================================== */
 
 import {
@@ -102,6 +103,9 @@ import {
   NotFoundError,
   RateLimitError,
 } from "../src/index.js";
+
+// NOTE: The demo release (wss-ccg-vol-1) has only FULL_MIX.
+// For STEM_* / DI_* — a paid release is required.
 
 /* ==========================================================================
    MAIN
@@ -146,6 +150,7 @@ async function main(): Promise<void> {
         // only if apiKey is set
         if (process.env.WALLSTACK_API_KEY) {
           try {
+            // Demo has only FULL_MIX. Replace with STEM_* / DI_* for paid releases.
             const dl = await client.tracks.download(
               firstTrack.slug,
               "FULL_MIX"

@@ -118,7 +118,7 @@ import type { WallStackClientOptions } from "./types.js";
    ========================================================================== */
 
 /** SDK version. */
-export const VERSION = "1.0.0";
+export const VERSION = "1.1.0";
 
 /** SDK package name. */
 export const SDK_NAME = "@wallstack-aa-caas/sdk";
