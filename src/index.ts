@@ -110,6 +110,7 @@ import { TracksClient } from "./endpoints/tracks.js";
 import { AuthClient } from "./endpoints/auth.js";
 import { UserClient } from "./endpoints/user.js";
 import { DashboardClient } from "./endpoints/dashboard.js";
+import { DatasetsClient } from "./endpoints/datasets.js";
 import type { WallStackClientOptions } from "./types.js";
 
 /* ==========================================================================
@@ -117,7 +118,7 @@ import type { WallStackClientOptions } from "./types.js";
    ========================================================================== */
 
 /** SDK version. */
-export const VERSION = "0.2.0";
+export const VERSION = "1.0.0";
 
 /** SDK package name. */
 export const SDK_NAME = "@wallstack-aa-caas/sdk";
@@ -168,6 +169,9 @@ export class WallStackClient {
   /** Dashboard download (Cookie, idempotent). */
   public readonly dashboard: DashboardClient;
 
+  /** Datasets (Dataset Centric 2.0). */
+  public readonly datasets: DatasetsClient;
+
   private readonly http: HttpClient;
 
   /**
@@ -184,6 +188,7 @@ export class WallStackClient {
     this.auth = new AuthClient(this.http);
     this.user = new UserClient(this.http);
     this.dashboard = new DashboardClient(this.http);
+    this.datasets = new DatasetsClient(this.http);
   }
 
   /**
@@ -275,6 +280,21 @@ export type {
   ListReleasesParams,
   /* Client */
   WallStackClientOptions,
+  /* Dataset Centric 2.0 */
+  DatasetStandardVersion,
+  PreampOutput,
+  DatasetPart,
+  CaptureMethod,
+  KnobSource,
+  DatasetAsset,
+  DatasetKnobVector,
+  DatasetItem,
+  DatasetTrack,
+  DatasetLicense,
+  DatasetManifest,
+  ChainStateResponse,
+  DatasetRequest,
+  DatasetRequestResponse,
 } from "./types.js";
 
 /* ==========================================================================
@@ -296,6 +316,8 @@ export { AuthClient } from "./endpoints/auth.js";
 export { UserClient } from "./endpoints/user.js";
 
 export { DashboardClient } from "./endpoints/dashboard.js";
+
+export { DatasetsClient } from "./endpoints/datasets.js";
 
 /* ==========================================================================
    DEFAULT EXPORT

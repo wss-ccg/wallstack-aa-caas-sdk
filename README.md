@@ -15,12 +15,14 @@ Official TypeScript SDK for the **WallStack AA-CaaS™ REST v2 API** — human-p
 
 ## Features
 
-- **19 endpoints** across 6 sub-clients
+- **18 endpoints** across 7 sub-clients (incl. **Dataset Centric 2.0**)
 - **Dual auth** — Bearer API key + JWT cookie
 - **Stripe-style errors** — 7 types + 25 error codes
 - **`{ data, meta }` responses** — consistent envelope
 - **Idempotency-Key** support (`/auth/token`, `/auth/refresh`, `/dashboard/download`)
 - **Retry with exponential backoff** on 429 / 5xx
+- **Dataset Centric 2.0** — `wss-ccg-ds-2.0` (AI Training datasets)
+- **Naming System 2.0** — 7 files per track (`AssetType` enum)
 - **Full TypeScript types** — synced with OpenAPI 3.1
 - **Dual ESM + CJS build**
 - **Node.js >= 18**
@@ -58,6 +60,11 @@ console.log(`${detail.title} — ${detail.tracks.length} tracks`);
 // 3. Bearer — download a track asset
 const dl = await client.tracks.download("the-loop-of-hope", "FULL_MIX");
 console.log(dl.download_url, "expires in", dl.expires_in, "s");
+
+// 4. Dataset Centric 2.0 — AI Training dataset
+const manifest = await client.datasets.manifest("wss-ccg-ds-NNNN");
+console.log(manifest.dataset.standardVersion); // "wss-ccg-ds-2.0"
+console.log(`${manifest.tracks.length} tracks, ${manifest.tracks[0].items.length} items`);
 ```
 
 ---
@@ -84,7 +91,7 @@ client.setJwtCookie("eyJhbGciOi...");
 
 ---
 
-## Endpoints (19)
+## Endpoints (18)
 
 ### Health (public)
 ```typescript
@@ -126,6 +133,23 @@ await client.dashboard.download(
   { trackSlug: "the-loop-of-hope", assetType: "FULL_MIX" },
   "idem-key-001"
 );
+```
+
+### Datasets (Dataset Centric 2.0)
+```typescript
+// Public — form options
+await client.datasets.chainState();
+
+// Public — submit request
+await client.datasets.request({
+  datasetName: "My Dataset",
+  tracks: [{ name: "Volume_1", key: "Dm", bpm: 120, harmony: "Dm-Bb-C-Gm", items: [] }],
+  email: "user@example.com",
+});
+
+// Bearer — Dataset Centric 2.0 manifest
+const m = await client.datasets.manifest("wss-ccg-ds-NNNN");
+console.log(m.dataset.standardVersion); // wss-ccg-ds-2.0
 ```
 
 ### Asset Types (7)

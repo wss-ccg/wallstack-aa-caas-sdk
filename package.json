@@ -1,6 +1,6 @@
 {
   "name": "@wallstack-aa-caas/sdk",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Official TypeScript SDK for WallStack AA-CaaS™ REST v2 API — AI Training datasets, DI+Wet paired audio, neural amp modeling",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -36,7 +36,9 @@
     "ai-dataset",
     "di-wet",
     "reamp",
-    "nam"
+    "nam",
+    "dataset-centric",
+    "naming-system"
   ],
   "author": {
     "name": "Andrey S. Yarovenko",

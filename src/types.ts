@@ -381,6 +381,163 @@ export interface ListReleasesParams {
 }
 
 /* ==========================================================================
+   DATASET CENTRIC 2.0 (AI Training datasets)
+   ========================================================================== */
+
+/** Dataset Centric standard version. */
+export type DatasetStandardVersion = "wss-ccg-ds-2.0";
+
+/** Preamp output (MAIN / RECORD, L / R). */
+export type PreampOutput = "MAIN_L" | "MAIN_R" | "REC_L" | "REC_R";
+
+/** Dataset part (guitar). */
+export type DatasetPart = "RHYTHM" | "ARPEGGIO" | "SOLO";
+
+/** Capture method. */
+export type CaptureMethod = "PARALLEL" | "REAMP";
+
+/** Knob vector source. */
+export type KnobSource = "PRESET" | "CUSTOM";
+
+/** Dataset file (DI or Wet, or Mix). */
+export interface DatasetAsset {
+  file: string;
+  sha256: string;
+}
+
+/** Knob vector (0–10). */
+export interface DatasetKnobVector {
+  gain: number;
+  treble: number;
+  mid: number;
+  bass: number;
+  master: number;
+  presence?: number;
+}
+
+/** Dataset item (one DI+Wet pair). */
+export interface DatasetItem {
+  id: string;
+  position: number;
+  part: DatasetPart;
+  takeGroupId?: string | null;
+  stereoGroupId?: string | null;
+  channelLabel: string;
+  level?: number;
+  presence?: number;
+  captureMethod: CaptureMethod;
+  knobSource: KnobSource;
+  preampChannel: string;
+  preampMode: string;
+  recordVoicing: "LO_GAIN" | "HI_GAIN";
+  preampOutput?: PreampOutput;
+  powerAmpMode?: "DEEP" | "HALF_DRIVE" | "MODERN";
+  powerAmpChannel?: "A" | "B";
+  presetId: string;
+  knobVector: DatasetKnobVector;
+  provenance: { source: string };
+  di: DatasetAsset;
+  wet: DatasetAsset;
+}
+
+/** Dataset track. */
+export interface DatasetTrack {
+  name: string;
+  key: string;
+  bpm: number;
+  harmony: string;
+  mix: DatasetAsset;
+  items: DatasetItem[];
+}
+
+/** Dataset license. */
+export interface DatasetLicense {
+  type: "WSS-LIC-AI";
+  verifyUrl: string;
+  sha256: string;
+}
+
+/** Full Dataset Centric 2.0 manifest. */
+export interface DatasetManifest {
+  dataset: {
+    id: string;
+    standardVersion: DatasetStandardVersion;
+    title: string;
+    description?: string;
+    createdAt?: string;
+    licenseId?: string;
+  };
+  format: {
+    codec: "WAV";
+    bitDepth: number;
+    sampleRate: number;
+  };
+  alignment: {
+    method: string;
+    tolerance: 0;
+  };
+  signal: {
+    noDigitalClipping: true;
+    measuredNoiseFloorDb: number;
+  };
+  chain: {
+    id: string;
+    preamp: string;
+    powerAmp: string;
+    irBank?: string;
+    capabilities: {
+      maxChannels: number;
+      stereoReady: boolean;
+      preampOutputs: PreampOutput[];
+      powerAmpChannels: ("A" | "B")[];
+    };
+  };
+  tracks: DatasetTrack[];
+  license: DatasetLicense;
+  contentIdCleared: true;
+}
+
+/** Chain state (form options for dataset request). */
+export interface ChainStateResponse {
+  data: {
+    channels: Array<{ label: string; preampOutput: PreampOutput }>;
+    presets: Array<{ id: string; name: string }>;
+    parts: DatasetPart[];
+  };
+  meta: ResponseMeta;
+}
+
+/** Dataset request body. */
+export interface DatasetRequest {
+  datasetName: string;
+  tracks: Array<{
+    name: string;
+    key: string;
+    bpm: number;
+    harmony: string;
+    items: Array<{
+      part: DatasetPart;
+      presetId: string;
+      preampOutput?: PreampOutput;
+    }>;
+  }>;
+  email: string;
+  password?: string;
+  isDemo?: boolean;
+}
+
+/** Dataset request response. */
+export interface DatasetRequestResponse {
+  data: {
+    inquiryId: string;
+    datasetName: string;
+    isDemo: boolean;
+    licenseId?: string;
+  };
+  meta: ResponseMeta;
+}
+
+/* ==========================================================================
    CLIENT OPTIONS
    ========================================================================== */
 
